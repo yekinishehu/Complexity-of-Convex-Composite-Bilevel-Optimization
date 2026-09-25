@@ -24,7 +24,7 @@ python supplement_verification.py
 
 Expected output:
 
-- `ALL 156 CHECKS PASSED` — the check count is asserted to equal **156**, the number
+- `ALL 166 CHECKS PASSED` — the check count is asserted to equal **166**, the number
   stated twice in the manuscript (end of §1.3 and Appendix C). If the assertion fires,
   the manuscript text must be synced to the printed count.
 - `figures/exp1_uniform_barrier.pdf` … `figures/exp7_deep_pair.pdf` and
@@ -37,7 +37,7 @@ Expected output:
   tabulated in the paper** (Tables 5–7 and the related sentences in §5.2); the code
   is the source of truth, not the other way around.
 
-## What the 156 checks verify
+## What the 166 checks verify
 
 - **Group A (141) — closed-form identities.** Every load-bearing algebraic step of
   the proofs: the `dd_i(chi)` closed form (3.13) and the polynomial bounds (a)–(b)

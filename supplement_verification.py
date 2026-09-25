@@ -211,9 +211,50 @@ check("C givens n=64", ok and growth)
 _, _, rep_ok = givens_check(128, 60)
 check("C report support <= k+2", rep_ok)
 
+
+# ============ GROUP A29: new corollary identities (10 checks) ============
+for q in [1.0, 2.0, 3.0]:                                        # 3
+    nC = 2048; kC = 512
+    rngC = np.random.default_rng(11)
+    yC = np.zeros(nC); yC[:kC] = rngC.standard_normal(kC)
+    ysC = ystar(nC)
+    yref = ysC.copy()
+    S = rngC.choice(np.arange(kC+1, nC), size=100, replace=False)
+    yref[S] *= -1
+    lhs = np.sum(np.abs(yC - yref)**q)
+    rhs = np.sum(np.abs(yC - ysC)**q)
+    check(f"A29 power-coupling equality q={q}", abs(lhs - rhs) < 1e-8)
+def Tmat(k): return 2*np.eye(k) - np.eye(k, k=1) - np.eye(k, k=-1)
+for (nb, bb) in [(30, 0.3), (50, 0.6)]:                          # 2
+    yb = bb*(nb+1-np.arange(1, nb+1))/nb
+    Tb = Tmat(nb)
+    grad = 2.0*(Tb@yb); grad[0] -= 2.0
+    act = np.abs(yb - bb) < 1e-12
+    check(f"A29 head-constr KKT n={nb}",
+          (grad[act] <= 1e-9).all() and (np.abs(grad[~act]) < 1e-9).all())
+for kk, bb in [(4, 0.3), (10, 0.3), (25, 0.3)]:                   # 3
+    yk = bb**2*(kk+1)/kk - bb**2*(50+1)/50
+    check(f"A29 head-constr gap k={kk}", abs(yk - bb**2*(50-kk)/(50*kk)) < 1e-12
+          and yk >= bb**2/(2*kk) - 1e-12)
+def fbipg_slow(a2, K, gamma=1.02):
+    a = np.sqrt(a2); y, z, yp, zp = 1.0, a, 1.0, a; tt = 1.0
+    for k in range(1, K+1):
+        al = (k+2)**(-gamma); w = (tt-1)/(tt+1)
+        vy = y + w*(y-yp); vz = z + w*(z-zp)
+        ey = (1+al)*vy - a*al*(vz - a*vy); ez = al*(vz - a*vy)
+        yn = vy - ey/(1+a2); zn = vz - ez/(1+a2)
+        yp, zp = y, z; y, z = yn, zn
+        tt = (1+np.sqrt(1+4*tt*tt))/2
+        if abs(y) < 0.5:
+            return k
+    return K
+for a2s in [100.0, 900.0]:                                       # 2
+    h = fbipg_slow(a2s, 8*int(a2s))
+    check(f"A29 slow-mode a^2={a2s}", 0.4 <= h/a2s <= 1.6)
+
 # ================= count assertion (sync with the paper) =================
 N = len(CHECKS)
-assert N == 156, f"CHECK COUNT {N} != 156 -- update both occurrences in the paper"
+assert N == 166, f"CHECK COUNT {N} != 156 -- update both occurrences in the paper"
 print(f"ALL {N} CHECKS PASSED")
 
 # ===================== EXPERIMENTS (figures + table values) =====================
